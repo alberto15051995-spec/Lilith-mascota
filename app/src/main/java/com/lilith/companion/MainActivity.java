@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-/** Lilith Companion 0.4: offline-first, user-initiated character chat and local TTS. */
+/** Lilith Companion 0.5: offline-first, user-initiated character chat and local TTS. */
 public final class MainActivity extends Activity {
     private SharedPreferences prefs;
     private LilithMind mind;
@@ -47,7 +47,7 @@ public final class MainActivity extends Activity {
         scroll.addView(root); setContentView(scroll);
         TextView title=label("LILITH COMPANION", 25, 0xffee536c);
         title.setTypeface(null, Typeface.BOLD); root.addView(title);
-        root.addView(label("v0.4 · Sin nube · Personalidad: Misteriosa", 14, 0xffc8a6ae));
+        root.addView(label("v0.5 · Sin nube · Personalidad: Misteriosa", 14, 0xffc8a6ae));
         mascot = new MascotView(this);
         root.addView(mascot, new LinearLayout.LayoutParams(-1,dp(240)));
         mascot.setOnClickListener(v -> { mascot.react(); sayAnswer(mind.greet()); });
@@ -78,6 +78,15 @@ public final class MainActivity extends Activity {
                 .setNegativeButton("Cancelar",null)
                 .setPositiveButton("Borrar",(d,w)->{mind.forgetAll();memoryCount.setText("Recuerdos guardados: 0");sayAnswer("Memoria borrada. Podemos comenzar de nuevo.");}).show());
 
+        Button showConversation=button(root,"Ver conversación reciente");
+        showConversation.setOnClickListener(v -> new AlertDialog.Builder(this).setTitle("Conversación local")
+                .setMessage(mind.conversationText()).setPositiveButton("Cerrar",null).show());
+        Button clearConversation=button(root,"Borrar conversación");
+        clearConversation.setOnClickListener(v -> new AlertDialog.Builder(this).setTitle("¿Borrar conversación?")
+                .setMessage("El historial reciente y el tema actual se borrarán. Los recuerdos explícitos seguirán guardados.")
+                .setNegativeButton("Cancelar",null)
+                .setPositiveButton("Borrar",(d,w)->sayAnswerAfterDeletion()).show());
+        root.addView(label("Motor conversacional local (reglas y contexto; no es una IA neuronal)",13,0xffd9adb7));
         root.addView(label("Voz local del teléfono",20,Color.WHITE));
         root.addView(label("Solo mostraremos voces de español que no requieran conexión. La voz de Suno es una referencia, no un clon sintetizado.",13,0xffd9adb7));
         voiceSpinner = new Spinner(this); root.addView(voiceSpinner);
@@ -119,6 +128,10 @@ public final class MainActivity extends Activity {
         });
     }
 
+    private void sayAnswerAfterDeletion() {
+        mind.clearConversation();
+        sayAnswer("He olvidado nuestra conversación reciente. Tus recuerdos siguen a salvo.");
+    }
     private void sayAnswer(String text) {
         response.setText(text); mascot.react();
         if(speakAnswers.isChecked()) playSpeech(text);
