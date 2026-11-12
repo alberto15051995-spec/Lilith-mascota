@@ -1,44 +1,32 @@
-# Lilith Companion v0.2 — motor neuronal
+# Lilith Companion v0.4 · Local para Android
 
-App Android independiente de Lilith Voice, con mascota animada y voz configurable.
+**Independiente de Lilith Voice.** Aplicación nativa Android en Java, sin permisos de Internet, sin Azure y sin backend.
 
-## Novedades v0.2
-- **Azure Speech Neural TTS real** vía API REST, con SSML para tono y velocidad.
-- 4 opciones de voz española: `es-ES-ElviraNeural`, `es-ES-AbrilNeural`, `es-ES-ArabellaMultilingualNeural`, `es-ES-IsidoraMultilingualNeural` (la disponibilidad puede variar según región o cuenta).
-- Selector de motor: Azure neuronal con conexión o TTS Android, que puede funcionar sin conexión si el móvil tiene voces locales.
-- Prueba de audio, detener, respuesta al tocar la mascota.
-- Clave privada introducida por el usuario y cifrada en Android Keystore (AES-GCM). No se incluye ninguna credencial en el código. Botón para borrarla.
-- Solo HTTPS y dominio de Azure generado a partir de identificador de región validado.
-- Los ajustes de tono, velocidad, personalidad, voz y región se conservan localmente.
+## Funcional ahora
 
-**Predeterminados:** tono 1.00x, velocidad 1.10x, personalidad Misteriosa, motor Android. El modo neuronal se activa voluntariamente tras configurar la cuenta para no provocar facturación involuntaria. Los valores que se guardaron en una instalación anterior prevalecen.
+- Lilith animada, reacciona al tocarla.
+- Chat por texto con personaje «Misteriosa» y respuestas **basadas en reglas**, no en un modelo de lenguaje neuronal.
+- Memoria de notas voluntarias: `recuerda que me gusta la fantasía`, `¿qué recuerdas?`.
+- Revisión de notas y borrado total con confirmación. Hasta 30 notas de 250 caracteres, almacenadas localmente.
+- Respuestas habladas con **las voces españolas locales que haya instaladas en Android**. Se excluyen las voces que el motor declara como dependientes de la red.
+- Tono y velocidad configurables y persistentes. Valores por defecto en instalación limpia: **1,00x y 1,10x**. Si hubo una versión anterior, se respetan sus ajustes; botón para restablecer.
+- Muestra femenina de Suno reproducible sin conexión como **audio de referencia**. No es una voz clonada y no genera frases nuevas con el timbre de Suno.
 
-## Activar el motor neuronal
-1. Crea un recurso Speech de Microsoft Azure que admita text-to-speech. Consulta la [documentación oficial](https://learn.microsoft.com/es-es/azure/ai-services/speech-service/rest-text-to-speech).
-2. Copia la región del recurso (por ejemplo `westeurope`) y **su clave** en Lilith Companion; no publiques ni subas la clave a GitHub.
-3. Pulsa **Guardar conexión neuronal**.
-4. Escoge **Azure Speech (neuronal)** y una de las cuatro voces.
-5. Ajusta tono y velocidad y pulsa **Probar voz de Lilith**.
-6. Si quieres evitar consumo de Azure, vuelve al motor Android. Para borrar la clave local, pulsa **Borrar clave neuronal**.
+## No está implementado
 
-**Costes y privacidad:** Azure puede cobrar por caracteres de voz procesados. El texto de prueba o el que Lilith pronuncie en modo neuronal se transmite a Microsoft Azure; no se envían contactos ni archivos. Se necesita Internet. La clave se almacena cifrada en este dispositivo, pero una app móvil nunca ofrece la misma protección frente a extracción/abuso que un backend propio; antes de distribuir la app a terceros, sustituir la clave del usuario en cliente por un servidor autenticado con cuotas. No habilitar claves compartidas dentro de la APK.
+- **Clonación neuronal local de la voz Suno**, modelo XTTS/Piper empaquetado o un LLM local. Requieren elegir modelos, compatibilidad, licencias y benchmarks específicos del teléfono. No confundas TTS de Android con voz neuronal personalizada.
+- Micrófono, activación permanente, mascota flotante sobre otras apps y control del móvil.
 
 ## Compilación
-1. Abre la carpeta `LilithCompanion` en Android Studio (JDK 17, Android SDK 35, plugin Android Gradle 8.7.x).
-2. Sincroniza el proyecto con Gradle. Instala lo que Android Studio solicite si es necesario.
-3. Conecta tu Xiaomi por USB con depuración USB y pulsa Run, o usa **Build > Build APK(s)**.
-4. APK de depuración esperada en `app/build/outputs/apk/debug/`.
 
-## Límites actuales
-- No se incluye APK compilada. No se ha ejecutado una compilación Android completa en este entorno.
-- No hay aún mascota flotante, transcripción de voz, conversación con un modelo de IA, emociones acústicas reales ni generación de voces nuevas desde cero. **Personalidad** cambia el texto de la muestra, no la acústica del modelo.
-- El control de pitch/rate puede ser interpretado de forma ligeramente distinta por Azure y Android TTS.
-- Si hay cambio de dispositivo o restauración, la clave podría necesitar volver a introducirse; Android Keystore no permite exportarla.
-- Servicio remoto opcional, no un modelo ejecutándose localmente en el móvil.
+Repositorio GitHub con `.github/workflows/android-apk.yml`: después de subir estos archivos a `main`, entra en **Actions → Compilar Lilith Companion APK**, descarga el artefacto `LilithCompanion-debug-apk`, descomprímelo e instala `app-debug.apk`.
 
-## Compilar desde GitHub Actions (sin ordenador)
-El proyecto incluye `.github/workflows/android-apk.yml`. Crea un repositorio privado nuevo y sube el **contenido** de la carpeta `LilithCompanion` a la raíz (la carpeta `app`, `build.gradle`, `settings.gradle` y `.github` deben quedar en la raíz).
+La compilación está configurada para `compileSdk 35`, Java 17, Gradle 8.9 y AGP definido en `build.gradle`. No se ha compilado una APK en este entorno; la ejecución en GitHub Actions determina si se compila sin errores.
 
-En GitHub > Actions > «Compilar Lilith Companion APK» > Run workflow, ejecuta la compilación. Si el workflow está habilitado y finaliza en verde, abre la ejecución y descarga el artefacto `LilithCompanion-debug-apk`. Dentro viene `app-debug.apk` para instalar en tu Android. Puede ser necesario autorizar la instalación de APKs desde tu gestor de archivos.
+## Privacidad
 
-Esta compilación es de **depuración**, no para publicar en Play Store. No introduzcas claves Azure en GitHub, archivos del repositorio ni variables del workflow: configura tu clave exclusivamente en la app instalada. No está garantizada la compilación hasta ejecutarla y comprobar el resultado.
+Esta versión carece de permiso `INTERNET`; no envía notas a servicios web. La voz local se apoya en el motor TTS instalado en el dispositivo, por lo que conviene descargar una voz sin conexión y probar con el modo avión. Los datos locales se borran desde la aplicación (recuerdos) o al eliminar sus datos desde Android (ajustes).
+
+## Actualización desde v0.3
+
+Subir el **contenido** de la carpeta `LilithCompanion/`, incluida `.github`, y sustituir el código anterior. El `applicationId` se mantiene, de modo que puede instalarse encima si el paquete se firma con una clave compatible. Las APK debug de GitHub Actions pueden usar claves distintas entre ejecuciones; si Android rechaza la actualización, tendrás que desinstalar la anterior (perderás los datos locales) e instalar la nueva.
